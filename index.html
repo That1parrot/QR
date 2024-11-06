@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="icon" type="image/x-icon" href="icon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quran Reading Tracker</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1f2125;
+            color: white;
+            margin: 0; /* Remove margin */
+        }
+
+        .progress-container {
+            text-align: center;
+            margin: 20px;
+        }
+
+        .search-bar {
+            display: flex; /* Use flexbox for layout */
+            justify-content: space-between; /* Space between elements */
+            margin-bottom: 20px; /* Add some space below */
+        }
+
+        .search-bar select {
+            margin-right: 10px; /* Space between select and input */
+            padding: 10px; /* Add padding for the select */
+            border-radius: 8px; /* Rounded corners for select */
+            border: none;
+            font-size: 16px;
+        }
+
+        .search-bar input {
+            width: 70%; /* Adjust input width */
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .container {
+            display: flex; /* Use flexbox for the layout */
+        }
+
+        .sidebar {
+            width: 40%; /* Set sidebar width to 40% */
+            background-color: #2c3e50;
+            padding: 10px;
+            overflow-y: auto; /* Enable scrolling if needed */
+        }
+
+        .verses-container {
+            width: 60%; /* Set verses container width to 60% */
+            padding: 20px; /* Add padding for the verses section */
+        }
+
+        @media (max-width: 768px) {
+            .search-bar {
+                flex-direction: column; /* Stack elements vertically */
+            }
+
+            .surah-container {
+                grid-template-columns: 1fr; /* One column layout for mobile */
+            }
+
+            .done-button {
+                width: 100%; /* Full width button on mobile */
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 24px; /* Smaller heading */
+            }
+
+            h2 {
+                font-size: 20px; /* Smaller subheading */
+            }
+
+            .done-button {
+                font-size: 16px; /* Adjust button text */
+            }
+        }
+
+        header {
+            background-color: #2c3e50;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 0;
+            color: #f1c40f;
+        }
+
+        h2 {
+            margin-top: 30px;
+            color: #f1c40f;
+            text-align: center;
+        }
+
+        #progress-bar {
+            width: 80%;
+            height: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #progress-text {
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .surah-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 20px;
+        }
+
+        .surah-box {
+            color: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .surah-box:hover {
+            background-color: #34495e;
+        }
+
+        .surah-box h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .done-button {
+            background-color: #f1c40f;
+            color: #2c3e50;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .done-button:hover {
+            background-color: #e1b500;
+            color: #ffffff;
+        }
+
+        #verses-container {
+            background-color: #272f34;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        #ayah-list {
+            margin-top: 20px;
+        }
+
+        .ayah-item {
+            margin-bottom: 15px;
+        }
+
+        .ayah-item p {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .bookmark-button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .bookmark-button:hover {
+            background-color: #2980b9;
+        }
+
+        .bookmark-container {
+            background-color: #2c3e50;
+            padding: 20px;
+            margin-bottom: 20px; /* Increase space above the bookmark section */
+            border-radius: 8px;
+        }
+
+        .bookmark-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .share-button {
+            background-color: #f1c40f;
+            color: #2c3e50;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .share-button:hover {
+            background-color: #e1b500;
+        }
+
+        .delete-button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .delete-button:hover {
+            background-color: #c0392b;
+        }
+
+        .achievement-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(50, 150, 50, 0.9); /* Semi-transparent green */
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        #reset-progress-button {
+            background-color: #e74c3c; /* Red color */
+            color: white; /* White text */
+            border: none; /* No border */
+            padding: 10px 15px; /* Padding for better appearance */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor on hover */
+            transition: background-color 0.3s ease; /* Smooth transition */
+            font-size: 16px; /* Font size */
+        }
+
+        #reset-progress-button:hover {
+            background-color: #c0392b; /* Darker red on hover */
+        }
+
+        #scroll-to-top {
+            background-color: #f1c40f; /* Yellow background */
+            color: #2c3e50; /* Dark text color */
+            border: none; /* No border */
+            padding: 15px 20px; /* Padding for better appearance */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer; /* Pointer cursor on hover */
+            font-size: 18px; /* Font size */
+            margin-top: 20px; /* Space above the button */
+            transition: background-color 0.3s; /* Smooth background color change */
+            display: none; /* Hidden by default */
+        }
+
+        #scroll-to-top:hover {
+            background-color: #e1b500; /* Darker yellow on hover */
+        }
+
+        /* CSS for Different Juz Colors - Darker Shades */
+        .juz-1 { background-color: #ff7f7f; } /* Darker red */
+        .juz-2 { background-color: #ffb36b; } /* Darker orange */
+        .juz-3 { background-color: #e2e600; } /* Darker yellow */
+        .juz-4 { background-color: #7fd55c; } /* Darker green */
+        .juz-5 { background-color: #67c9db; } /* Darker cyan */
+        .juz-6 { background-color: #5e9bd3; } /* Darker blue */
+        .juz-7 { background-color: #8ae5a3; } /* Darker light green */
+        .juz-8 { background-color: #ff8e40; } /* Darker peach */
+        .juz-9 { background-color: #ff2e3b; } /* Darker crimson */
+        .juz-10 { background-color: #00bcd4; } /* Darker turquoise */
+        .juz-11 { background-color: #ff80ab; } /* Darker pink */
+        .juz-12 { background-color: #a8aaff; } /* Darker lavender */
+        .juz-13 { background-color: #e1a74b; } /* Darker golden yellow */
+        .juz-14 { background-color: #ffca28; } /* Darker mustard */
+        .juz-15 { background-color: #ff4757; } /* Darker coral */
+        .juz-16 { background-color: #6fc3e5; } /* Darker sky blue */
+        .juz-17 { background-color: #f2b2d4; } /* Darker light purple */
+        .juz-18 { background-color: #9dd99c; } /* Darker soft green */
+        .juz-19 { background-color: #d75151; } /* Darker red-orange */
+        .juz-20 { background-color: #a85c5c; } /* Darker mauve */
+        .juz-21 { background-color: #4e3f99; } /* Darker violet */
+        .juz-22 { background-color: #f4a0a0; } /* Darker soft pink */
+        .juz-23 { background-color: #50d1e0; } /* Darker light blue */
+        .juz-24 { background-color: #ffce54; } /* Darker butter yellow */
+        .juz-25 { background-color: #f49c9c; } /* Darker light red */
+        .juz-26 { background-color: #a09ac3; } /* Darker grayish purple */
+        .juz-27 { background-color: #ff4b3a; } /* Darker peach red */
+        .juz-28 { background-color: #b7d61a; } /* Darker olive green */
+        .juz-29 { background-color: #7c7c7c; } /* Darker gray */
+        .juz-30 { background-color: #ffb3a6; } /* Darker soft peach */
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Surah Progress Tracker</h1>
+    </header>
+
+    <div class="progress-container">
+        <p id="progress-text">Complete 0% - 0/114</p>
+        <progress id="progress-bar" value="0" max="100"></progress>
+        <button id="reset-progress-button" onclick="resetProgress()">Reset Progress</button>
+    </div>
+    
+    <section class="bookmark-container" id="bookmark-list">
+        <h2>Bookmarked Verses</h2>
+    </section>
+    
+    <div class="search-bar">
+        <label for="translation-select">Select Translation:</label>
+        <select id="translation-select" onchange="updateTranslation()">
+            <option value="en.yusufali">Abdullah Yusuf Ali</option>
+            <option value="en.sahih">Sahih International</option>
+        </select>
+        <input type="text" id="search-input" placeholder="Search for a Surah by name or number..." onkeyup="filterSurahs()">
+    </div>
+    
+    <div class="container">
+        <div class="sidebar">
+            <h2>Surah List</h2>
+            <button onclick="exportProgressToCSV()">Export Progress as CSV</button>
+            <input type="file" accept=".csv" onchange="importProgressFromCSV(event)">
+
+            <div class="surah-container" id="surah-list"></div>
+        </div>
+        <div class="verses-container">
+            <section id="verses-container">
+                <h2>Surah Verses</h2>
+                <div id="ayah-list"></div>
+                <button id="scroll-to-top" onclick="scrollToTop()" style="display: none;">Scroll to Top</button>
+            </section>
+        </div>
+    </div>
+    
+    <div class="achievement-message" id="achievement-message" style="display:none;">
+        🎉 Congratulations! You have completed a Juz! 🎉 <span id="completed-juz-number"></span>!
+    </div>
+
+    <script>
+        // Surahs Array (Correct Order)
+        const surahs = [
+            "Al-Fatiha",         // 1
+            "Al-Baqarah",        // 2
+            "Aal-E-Imran",       // 3
+            "An-Nisa",           // 4
+            "Al-Ma'idah",        // 5
+            "Al-An'am",          // 6
+            "Al-A'raf",          // 7
+            "Al-Anfal",          // 8
+            "At-Tawbah",         // 9
+            "Yunus",             // 10
+            "Hud",               // 11
+            "Yusuf",             // 12
+            "Ar-Ra'd",           // 13
+            "Ibrahim",           // 14
+            "Al-Hijr",           // 15
+            "An-Nahl",           // 16
+            "Al-Isra",           // 17
+            "Al-Kahf",           // 18
+            "Maryam",            // 19
+            "Taha",              // 20
+            "Al-Anbiya",         // 21
+            "Al-Hajj",           // 22
+            "Al-Mu'minun",       // 23
+            "An-Nur",            // 24
+            "Al-Furqan",         // 25
+            "Ash-Shu'ara",       // 26
+            "An-Naml",           // 27
+            "Al-Qasas",          // 28
+            "Al-Ankabut",        // 29
+            "Ar-Rum",            // 30
+            "Luqman",            // 31
+            "As-Sajda",          // 32
+            "Al-Ahzab",          // 33
+            "Saba",              // 34
+            "Fatir",             // 35
+            "Ya-Sin",            // 36
+            "As-Saffat",         // 37
+            "Sad",               // 38
+            "Az-Zumar",          // 39
+            "Ghafir",            // 40
+            "Fussilat",          // 41
+            "Ash-Shura",         // 42
+            "Az-Zukhruf",        // 43
+            "Ad-Dukhan",         // 44
+            "Al-Jathiya",        // 45
+            "Al-Ahqaf",          // 46
+            "Muhammad",          // 47
+            "Al-Fath",           // 48
+            "Al-Hujurat",        // 49
+            "Qaf",               // 50
+            "Adh-Dhariyat",      // 51
+            "At-Tur",            // 52
+            "An-Najm",           // 53
+            "Al-Qamar",          // 54
+            "Ar-Rahman",         // 55
+            "Al-Waqi'a",         // 56
+            "Al-Hadid",          // 57
+            "Al-Mujadila",       // 58
+            "Al-Hashr",          // 59
+            "Al-Mumtahina",      // 60
+            "As-Saff",           // 61
+            "Al-Jumu'a",         // 62
+            "Al-Munafiqun",      // 63
+            "At-Taghabun",       // 64
+            "At-Talaq",          // 65
+            "At-Tahrim",         // 66
+            "Al-Mulk",           // 67
+            "Al-Qalam",          // 68
+            "Al-Haqqa",          // 69
+            "Al-Ma'arij",        // 70
+            "Nuh",               // 71
+            "Al-Jinn",           // 72
+            "Al-Muzzammil",      // 73
+            "Al-Muddathir",      // 74
+            "Al-Qiyama",         // 75
+            "Al-Insan",          // 76
+            "Al-Mursalat",       // 77
+            "An-Naba",           // 78
+            "An-Nazi'at",        // 79
+            "Abasa",             // 80
+            "At-Takwir",         // 81
+            "Al-Infitar",        // 82
+            "Al-Mutaffifin",     // 83
+            "Al-Inshiqaq",       // 84
+            "Al-Buruj",          // 85
+            "At-Tariq",          // 86
+            "Al-A'la",           // 87
+            "Al-Ghashiya",       // 88
+            "Al-Fajr",           // 89
+            "Al-Balad",          // 90
+            "Ash-Shams",         // 91
+            "Al-Lail",           // 92
+            "Ad-Duhaa",          // 93
+            "Ash-Sharh",         // 94
+            "At-Tin",            // 95
+            "Al-Alaq",           // 96
+            "Al-Qadr",           // 97
+            "Al-Bayyina",        // 98
+            "Az-Zalzala",        // 99
+            "Al-Adiyat",         // 100
+            "Al-Qari'a",         // 101
+            "At-Takathur",       // 102
+            "Al-Asr",            // 103
+            "Al-Humaza",         // 104
+            "Al-Fil",            // 105
+            "Quraish",           // 106
+            "Al-Ma'un",          // 107
+            "Al-Kawthar",        // 108
+            "Al-Kafirun",        // 109
+            "An-Nasr",           // 110
+            "Al-Masad",          // 111
+            "Al-Ikhlas",         // 112
+            "Al-Falaq",          // 113
+            "An-Nas"             // 114
+        ];
+
+        // Validation
+        if (surahs.length !== 114) {
+            console.error(`Surah list contains ${surahs.length} entries. It should contain exactly 114.`);
+        }
+
+        // DOM Elements
+        const surahList = document.getElementById('surah-list');
+        const bookmarkList = document.getElementById('bookmark-list');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const achievementMessage = document.getElementById('achievement-message');
+        const completedJuzNumber = document.getElementById('completed-juz-number');
+        const scrollToTopButton = document.getElementById('scroll-to-top');
+
+        // State Variables
+        let completedSurahs = JSON.parse(localStorage.getItem('completedSurahs')) || new Array(114).fill(false);
+        let currentSurahIndex = null;
+        let selectedTranslation = 'en.yusufali';
+        let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+
+        // Define Juz Start Surahs for Dynamic Juz Numbering (Global Scope)
+        const juzStart = [1, 3, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 62, 65, 68, 71, 74, 77, 80, 83, 86, 87];
+
+        // Function to Get Juz Number
+        function getJuzNumber(surahNumber) {
+            for (let i = juzStart.length - 1; i >= 0; i--) {
+                if (surahNumber >= juzStart[i]) {
+                    return i + 1; // Juz numbers start from 1
+                }
+            }
+            return 1; // Default to Juz 1
+        }
+
+        // Function to Get Juz Class
+        function getJuzClass(surahNumber) {
+            const juzNumber = getJuzNumber(surahNumber);
+            return `juz-${juzNumber}`;
+        }
+
+        // Function to Update Progress
+        function updateProgress() {
+            const completed = completedSurahs.filter(c => c).length;
+            const percentage = (completed / 114) * 100;
+            progressBar.value = percentage;
+            progressText.textContent = `Complete ${Math.round(percentage)}% - ${completed}/114`;
+        }
+
+        // Function to Update Translation
+        function updateTranslation() {
+            const translationSelect = document.getElementById('translation-select');
+            selectedTranslation = translationSelect.value; // Update the selected translation
+            if (currentSurahIndex !== null) {
+                showSurahContent(currentSurahIndex + 1); // Reload the current Surah with the new translation
+            }
+        }
+
+        // Function to Render Surah List
+        function renderSurahList(filter = '') {
+            surahList.innerHTML = ''; // Clear the current list
+
+            // Determine if the filter is a number
+            const isNumberFilter = /^\d+$/.test(filter);
+
+            surahs.forEach((surah, index) => {
+                const surahNumber = index + 1;
+
+                // If the filter is not a number and the Surah is completed, skip it
+                if (!isNumberFilter && filter && completedSurahs[index]) {
+                    return; // Skip this Surah in the filtered list
+                }
+
+                // Check if the Surah matches the filter criteria
+                if (
+                    surah.toLowerCase().includes(filter) || // Match Surah name
+                    (filter.startsWith('juz ') && getJuzClass(surahNumber) === `juz-${filter.split(' ')[1]}`) || // Match Juz
+                    (isNumberFilter && filter === surahNumber.toString()) // Match Surah number
+                ) {
+                    const juzClass = getJuzClass(surahNumber);
+
+                    const surahElement = document.createElement('div');
+                    surahElement.className = `surah-box ${juzClass}`;
+                    surahElement.innerHTML = `
+                        <h3>${surahNumber}. ${surah}</h3>
+                        <button class="done-button" onclick="toggleMark(${index}); event.stopPropagation();">
+                            ${completedSurahs[index] ? 'Unmark as Done' : 'Mark as Done'}
+                        </button>
+                    `;
+                    surahElement.onclick = () => {
+                        currentSurahIndex = index;
+                        showSurahContent(surahNumber);
+                        scrollToTranslationSection();
+                    };
+                    surahList.appendChild(surahElement);
+                }
+            });
+        }
+
+        // Function to Show Surah Content (Fetch and Display Ayahs)
+        async function showSurahContent(surahNumber) {
+            const ayahList = document.getElementById('ayah-list');
+            ayahList.innerHTML = 'Loading verses...'; // Show loading message
+
+            try {
+                // Fetch the verses using the selected translation
+                let response = await fetch(`https://api.alquran.cloud/v1/surah/${surahNumber}/${selectedTranslation}`);
+                if (!response.ok) {
+                    ayahList.innerHTML = 'Error: The selected translation is not available.'; // Error handling
+                    return;
+                }
+                const data = await response.json();
+
+                // Check if verses are available in the response
+                if (data.data.ayahs && data.data.ayahs.length > 0) {
+                    const verses = data.data.ayahs;
+                    ayahList.innerHTML = ''; // Clear previous verses
+
+                    // Display each verse in the ayah list
+                    verses.forEach((ayah, index) => {
+                        const ayahElement = document.createElement('div');
+                        ayahElement.classList.add('ayah-item');
+                        ayahElement.innerHTML = `
+                            <p><strong>Ayah ${ayah.numberInSurah}</strong>:</p>
+                            <p>${ayah.text}</p>
+                            <button class="bookmark-button" onclick="addBookmark(${surahNumber}, ${ayah.numberInSurah}); event.stopPropagation();">Bookmark</button>
+                        `;
+                        ayahList.appendChild(ayahElement);
+                    });
+
+                    // Scroll to the first Ayah offset by 250 pixels if it exists
+                    if (verses.length > 0) {
+                        const firstAyah = ayahList.children[0]; // Access the first Ayah
+                        const offsetPosition = firstAyah.getBoundingClientRect().top + window.scrollY - 250; // Calculate offset position
+                        window.scrollTo({ top: offsetPosition, behavior: 'smooth' }); // Smooth scroll to the position
+                    }
+
+                    toggleScrollToTopButton(); // Show or hide the scroll button
+                } else {
+                    ayahList.innerHTML = 'Error: No verses found for this Surah.'; // Handle case where no verses are returned
+                    toggleScrollToTopButton(); // Update button visibility
+                }
+            } catch (error) {
+                ayahList.innerHTML = `<p>Error loading verses: ${error.message}</p>`; // Handle fetch errors
+                toggleScrollToTopButton(); // Update button visibility
+            }
+        }
+
+        // Function to Add a Bookmark
+        function addBookmark(surahNumber, ayahNumber) {
+            const bookmark = { surahNumber, ayahNumber };
+            bookmarks.push(bookmark);
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            renderBookmarkList();
+        }
+
+        // Function to Render Bookmark List
+        function renderBookmarkList() {
+            bookmarkList.innerHTML = '<h2>Bookmarked Verses</h2>';
+            if (bookmarks.length === 0) {
+                bookmarkList.innerHTML += '<p>No bookmarks yet.</p>';
+                return;
+            }
+            bookmarks.forEach((bookmark, index) => {
+                const bookmarkElement = document.createElement('div');
+                bookmarkElement.classList.add('bookmark-item');
+                bookmarkElement.innerHTML = `
+                    <span>Surah ${bookmark.surahNumber}, Ayah ${bookmark.ayahNumber}</span>
+                    <div>
+                        <button class="share-button" onclick="shareBookmark(${bookmark.surahNumber}, ${bookmark.ayahNumber})">Share</button>
+                        <button class="delete-button" onclick="deleteBookmark(${index})">Delete</button>
+                    </div>
+                `;
+                bookmarkList.appendChild(bookmarkElement);
+            });
+        }
+
+        // Function to Delete a Bookmark
+        function deleteBookmark(index) {
+            bookmarks.splice(index, 1);
+            localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+            renderBookmarkList();
+        }
+
+        // Function to Share a Bookmark
+        function shareBookmark(surahNumber, ayahNumber) {
+            const url = `https://quran.com/${surahNumber}:${ayahNumber}`;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('Link copied to clipboard: ' + url);
+            }).catch(err => {
+                console.error('Failed to copy link: ', err);
+            });
+        }
+
+        // Function to Toggle Marking a Surah as Completed
+        function toggleMark(index) {
+            completedSurahs[index] = !completedSurahs[index];
+            localStorage.setItem('completedSurahs', JSON.stringify(completedSurahs));
+            updateProgress();
+            
+            // Call renderSurahList with current input filter to reflect the changes
+            const currentFilter = document.getElementById('search-input').value.toLowerCase();
+            renderSurahList(currentFilter);
+            checkJuzCompletion(index + 1);
+        }
+
+        // Function to Check Juz Completion
+        function checkJuzCompletion(surahNumber) {
+            const juzNumber = getJuzNumber(surahNumber);
+            const juzStartSurah = juzStart[juzNumber - 1];
+            const juzEndSurah = juzNumber < 30 ? juzStart[juzNumber] - 1 : 114;
+
+            const isJuzCompleted = surahs.slice(juzStartSurah - 1, juzEndSurah).every((_, idx) => completedSurahs[juzStartSurah - 1 + idx]);
+
+            if (isJuzCompleted) {
+                // Show achievement message
+                completedJuzNumber.textContent = juzNumber;
+                achievementMessage.style.display = 'block';
+
+                // Fade out after 3 seconds
+                setTimeout(() => {
+                    achievementMessage.style.opacity = 0;
+                    setTimeout(() => {
+                        achievementMessage.style.display = 'none';
+                        achievementMessage.style.opacity = 1;
+                    }, 500);
+                }, 3000);
+            }
+        }
+
+        // Function to Reset Progress
+        function resetProgress() {
+            if (confirm("Are you sure you want to reset your progress? This action cannot be undone.")) {
+                completedSurahs = new Array(114).fill(false); // Reset completedSurahs
+                localStorage.removeItem('completedSurahs'); // Clear from localStorage
+                updateProgress(); // Update progress display
+                renderSurahList(); // Re-render the Surah list
+                alert("Your progress has been reset."); // You can replace this with a custom notification if you prefer
+            }
+        }
+
+        // Function to Filter Surahs Based on Search Input
+        function filterSurahs() {
+            const filter = document.getElementById('search-input').value.toLowerCase();
+            renderSurahList(filter);
+        }
+
+        // Function to Toggle Scroll-to-Top Button Visibility
+        function toggleScrollToTopButton() {
+            // Show the button only if there are Ayahs displayed
+            if (document.getElementById('ayah-list').children.length > 0) {
+                scrollToTopButton.style.display = 'block';
+            } else {
+                scrollToTopButton.style.display = 'none';
+            }
+        }
+
+        // Function to Scroll to the Translation Section (Optional)
+        function scrollToTranslationSection() {
+            // Implement the logic to scroll to the translation section if needed
+            // For example, scroll to the verses-container
+            const versesSection = document.getElementById('verses-container');
+            const offsetPosition = versesSection.getBoundingClientRect().top + window.scrollY - 100; // Adjust offset as needed
+            window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+        }
+
+        // Function to Scroll to Top
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            scrollToTopButton.style.display = 'none';
+        }
+
+        // Initial Render
+        renderSurahList();
+        updateProgress();
+        renderBookmarkList();
+    </script>
+</body>
+
+
+
+
+
+<script>
+function exportProgressToCSV() {
+    let csvContent = "data:text/csv;charset=utf-8,Surah,Completed\n";
+    const completedSurahs = JSON.parse(localStorage.getItem('completedSurahs')) || [];
+
+    completedSurahs.forEach((isCompleted, index) => {
+        if (isCompleted) {
+            csvContent += `${index + 1},true\n`; // Only export completed Surahs
+        }
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "progress.csv");
+    document.body.appendChild(link); // Required for Firefox
+    link.click();
+    document.body.removeChild(link);
+}
+
+</script>
+
+<script>
+
+function importProgressFromCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const content = e.target.result;
+        const rows = content.split('\n').slice(1); // Skip the header row
+        let completedSurahs = JSON.parse(localStorage.getItem('completedSurahs')) || Array(114).fill(false);
+
+        rows.forEach(row => {
+            const [surah, completed] = row.split(',');
+            if (surah && completed.trim() === 'true') {
+                completedSurahs[parseInt(surah) - 1] = true; // Only mark Surahs as completed
+            }
+        });
+
+        localStorage.setItem('completedSurahs', JSON.stringify(completedSurahs));
+        updateProgress();      // Update progress bar
+        renderSurahList();     // Refresh the list of Surahs displayed
+        alert('Progress imported successfully!');
+    };
+    reader.readAsText(file);
+}
+
+
+</script>
+
+</html>
