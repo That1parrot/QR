@@ -24,8 +24,3 @@ A web-based Quran reading tracker designed to help you manage and monitor your p
 3. **Importing Progress from CSV**
    - Use the "Import Progress" button to upload a CSV file.
    - Only Surahs marked as read in the CSV file will be added to your current progress without overwriting other completed Surahs.
-
-### Authentication UI
-
-- This project includes a basic authentication interface for Login and Signup, which is currently designed for frontend purposes.
-- Firebase or similar backend integrations can be added for full authentication support if needed.
